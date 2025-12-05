@@ -1,0 +1,257 @@
+1. Core Objective
+
+Build ChronoMind as a desktop + web AI client that adds a persistent memory layer to any LLM.
+User provides their own API keys for:
+
+Gemini (DeepMind)
+
+OpenAI
+
+Claude
+
+Azure AI
+
+Microsoft models
+
+Perplexity
+
+OpenRouter
+
+ChronoMind retrieves memory, constructs a context block, sends to selected LLM, and updates memory using NLP.
+
+2. Storage Architecture (Updated for Desktop)
+
+ChronoMind supports three storage modes, with strict priority:
+
+1. Desktop App Mode (Default)
+
+Platform: Windows, macOS, Linux
+Tech: Electron + Node.js backend
+
+Storage requirements:
+
+Encrypted local file storage (AES-256-gcm)
+
+Use better-sqlite3 or SQLite for memory DB
+
+Store embeddings in embeddings.bin
+
+Store facts, summaries, metadata as encrypted JSON
+
+Vector search via a local FAISS-lite or similar
+
+All memory stays on device
+
+No cloud usage unless user toggles it
+
+2. Web Mode → Google Drive Storage
+
+If running in browser:
+
+Authenticate with Google OAuth
+
+Store encrypted files inside:
+Drive → Apps/ChronoMindMemory/
+
+Sync only with the user’s account
+
+Maintain same file structure as desktop version
+
+3. Optional Firestore Mode
+
+User must manually enable in settings.
+Used only for:
+
+Multi-device sync beyond Drive
+
+Team/collab features (future)
+
+3. Required Folder Structure (Desktop)
+
+Inside the user's OS home directory:
+
+ChronoMind/
+   storage/
+      facts.json.enc
+      summaries.json.enc
+      embeddings.bin.enc
+      conversations.db.enc
+      metadata.json.enc
+
+
+Encryption handled via:
+
+AES-256-GCM with a key derived from user password (PBKDF2)
+
+4. App Architecture Tasks for Cursor
+Backend (Node.js + TypeScript)
+
+Build:
+
+ProviderRouter (OpenAI, Gemini, Claude, etc.)
+
+MemoryManager
+
+DB read/write
+
+Embedding store
+
+Summaries
+
+Structured facts
+
+LocalStorageAdapter (desktop)
+
+DriveStorageAdapter (web)
+
+FirestoreStorageAdapter (optional)
+
+ContextBuilder (persona + summaries + facts + relevant memory)
+
+NLP Extraction Engine
+
+User preferences
+
+Personal facts
+
+Project/task detection
+
+Summarization
+
+Vector Index
+
+Node-based (FAISS-lite, cosine sim, or custom implementation)
+
+Desktop Frontend (Electron + React + Tailwind)
+
+Screens required:
+
+Chat Interface
+
+Provider Settings (API Keys)
+
+Memory Viewer
+
+Storage Settings (Local/Drive/Firestore)
+
+Persona Config
+
+Conversation History
+
+Encryption Password Setup
+
+Local database information
+
+State management: Zustand or Redux Toolkit.
+
+Web Frontend (React + Tailwind)
+
+Mirrors desktop UI except:
+
+Storage default = Google Drive
+
+Requires login with Google
+
+No local DB, only encrypted Drive files
+
+5. Memory Engine Specification
+Memory Files
+
+facts.json.enc → Structured facts
+
+summaries.json.enc → History summaries
+
+embeddings.bin.enc → Vector index
+
+conversations.db.enc → Last N exchanges
+
+metadata.json.enc → App config
+
+SuperMemory Loop
+
+User input
+
+Retrieve memory
+
+Build context
+
+Provider call
+
+NLP extraction
+
+Store updated memory
+
+Vector search must be fast and optimized for desktop systems.
+
+6. APIs to Implement (Backend)
+POST /chat
+POST /memory/retrieve
+POST /memory/update
+POST /storage/local
+POST /storage/drive
+POST /storage/firestore
+POST /providers/openai
+POST /providers/gemini
+POST /providers/claude
+POST /providers/perplexity
+POST /providers/openrouter
+POST /persona/update
+GET  /metadata
+
+7. Non-Functional Requirements
+
+Strict TypeScript everywhere
+
+Full error handling + fallbacks
+
+Memory trimming when token limit risk detected
+
+Encrypted-at-rest and encrypted-in-transit
+
+Offline-first desktop mode
+
+Automatic migrations for DB schema
+
+Unit tests (Vitest/Jest)
+
+CI/CD with linting and type checks
+
+8. Cursor Behavior Instructions
+
+When generating code:
+
+Always output full files, not diffs.
+
+Maintain modular folder structure.
+
+Do not hardcode secrets.
+
+Follow architecture strictly.
+
+Automatically generate types, adapters, interfaces, and mocks.
+
+Ask for environment variables if missing.
+
+Include documentation inside each module.
+
+9. Deliverables Cursor Should Produce
+
+Electron + React desktop app
+
+React web app (Google Drive storage)
+
+Node.js backend
+
+Full memory engine implementation
+
+Provider adapters (OpenAI/Gemini/Claude/etc.)
+
+Local and Drive storage adapters
+
+NLP extraction and summarization modules
+
+Vector index implementation
+
+Documentation
+
+Tests (unit + integration)
